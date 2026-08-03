@@ -1,6 +1,4 @@
 MongoClient
 Flask
 jsonify
-request
 CORS
-ObjectId
