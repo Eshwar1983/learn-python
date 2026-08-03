@@ -1,13 +1,16 @@
-from flask import Flask, jsonify
-import os
+from fastapi import FastAPI
+import uvicorn
 
-app = Flask(__name__)
+app = FastAPI()
 
-@app.route('/')
-def home():
-    return jsonify({"message": "Hello from Render backend!"})
+@app.get("/api/data")
+def get_data():
+    # This is the data your backend sends back
+    return {
+        "status": "success",
+        "message": "Hello from Render!",
+        "items": ["Python", "FastAPI", "Render"]
+    }
 
-if __name__ == '__main__':
-    # Render sets the PORT environment variable automatically
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
