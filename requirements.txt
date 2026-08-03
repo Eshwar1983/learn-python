@@ -1,6 +1,2 @@
-fastapi
-uvicorn
-pymongo[srv]
-motor
-dnspython
-pydantic
+flask
+gunicorn
