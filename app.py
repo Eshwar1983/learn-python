@@ -1,28 +1,29 @@
-import requests
+from pymongo import MongoClient
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from bson.objectid import ObjectId
 
-# 1. Define the public API endpoint (returns sample JSON data)
-url = "https://typicode.com"
+app = Flask(__name__)
+CORS(app)
 
-try:
-    # 2. Send the HTTP GET request
-    response = requests.get(url, timeout=5)
-    
-    # 3. Raise an exception if the request failed (e.g., 404, 500)
-    response.raise_for_status()
-    
-    # 4. Parse the response body as JSON
-    data = response.json()
-    
-    # 5. Print the retrieved data
-    print("✅ Data fetched successfully!")
-    print(f"Title: {data['title']}")
-    print(f"Body: {data['body']}")
+MONGO_URI = "mongodb+srv://eshwargowda19_db_user:DG6Pq4EMcwylcZK6@cluster0.8vevz6x.mongodb.net/?appName=Cluster0"
+client = MongoClient(MONGO_URI)
+db = client["known-person"]
+collection = db["populur"]
 
-except requests.exceptions.HTTPError as http_err:
-    print(f"❌ HTTP error occurred: {http_err}")
-except requests.exceptions.ConnectionError:
-    print("❌ Error: Could not connect to the server.")
-except requests.exceptions.Timeout:
-    print("❌ Error: The request timed out.")
-except requests.exceptions.RequestException as err:
-    print(f"❌ An error occurred: {err}")
+@app.route('/api/data', methods=['GET'])
+def get_data():
+  try:
+    documents = []
+    # Fetch all documents from the collection
+    for doc in collection.find():
+      # Convert ObjectId to string for JSON compatibility
+      doc['_id'] = str(doc['_id'])
+      print(f"Items are adding+: {doc}")
+      documents.append(doc)
+    return jsonify(documents)
+  except Exception as e:
+    return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+  app.run(port=5000, debug=True)
