@@ -1,24 +1,32 @@
+import os
+from flask import Flask, jsonify
+from pymongo import MongoClient
+from bson import ObjectId
+
 app = Flask(__name__)
-CORS(app)
 
-MONGO_URI = "mongodb+srv://eshwargowda19_db_user:DG6Pq4EMcwylcZK6@cluster0.8vevz6x.mongodb.net/?appName=Cluster0"
+# Fetch URI from Render Environment
+MONGO_URI = "MONGO_URI"
+if not MONGO_URI:
+    raise ValueError("MONGO_URI environment variable is missing!")
+
 client = MongoClient(MONGO_URI)
-db = client["known-person"]
-collection = db["populur"]
+db = client["school_db"]
+collection = db["students"]
 
-@app.route('/api/data', methods=['GET'])
-def get_data():
-  try:
-    documents = []
-    # Fetch all documents from the collection
-    for doc in collection.find():
-      # Convert ObjectId to string for JSON compatibility
-      doc['_id'] = str(doc['_id'])
-      print(f"Items are adding+: {doc}")
-      documents.append(doc)
-    return jsonify(documents)
-  except Exception as e:
-    return jsonify({"error": str(e)}), 500
+def format_doc(doc):
+    if doc:
+        doc["_id"] = str(doc["_id"])
+    return doc
 
-if __name__ == '__main__':
-  app.run(port=5000, debug=True)
+@app.route("/data", methods=["GET"])
+def get_all_data():
+    try:
+        cursor = collection.find().limit(100)
+        results = [format_doc(doc) for doc in cursor]
+        return jsonify({"status": "success", "data": results}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
