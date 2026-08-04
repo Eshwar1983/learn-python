@@ -1,4 +1,4 @@
-MongoClient
-Flask
-jsonify
-CORS
+fastapi
+uvicorn
+pymongo
+dnspython
